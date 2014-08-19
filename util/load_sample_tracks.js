@@ -5,10 +5,11 @@
 var artistIds = require('./artist-ids')
   , http = require('http')
   , JSONStream = require('JSONStream')
-  , limit = 7 // The number of songs to retrieve for each artist
+  , limit = 4 // The number of songs to retrieve for each artist
   , parser = JSONStream.parse(['results', true])
-  , popIds = artistIds.pop
-  , rapIds = artistIds.rap
+  , schlagerIds = artistIds.schlager
+  , ballermanIds = artistIds.ballerman
+  , schlandIds = artistIds.schland
   , rc = require('redis').createClient()
   , rockIds = artistIds.rock
   , rooms = require('../config').rooms
@@ -20,7 +21,7 @@ var options = {
   headers: {'content-type': 'application/json'},
   host: 'itunes.apple.com',
   // Look up multiple artists by their IDs and get `limit` songs for each one
-  path: '/lookup?id='+popIds.concat(rapIds, rockIds).join()+'&entity=song&limit='+limit,
+  path: '/lookup?id='+ballermanIds.concat(schlagerIds, schlandIds).join()+'&entity=song&limit='+limit,
   port: 80
 };
 
@@ -31,18 +32,22 @@ var options = {
 var updateRooms = function(artistId) {
   rooms = ['mixed'];
   score = 0;
-  if (artistId === popIds[0]) {
-    rooms.push('hits', 'pop');
+  if (artistId === schlagerIds[0]) {
+    rooms.push('schlager');
     // Set the skip counter (there is no need to update the rooms for the next pop artists)
-    skip = popIds.length - 1;
+    skip = schlagerIds.length - 1;
   }
-  else if (artistId === rapIds[0]) {
-    rooms.push('rap');
-    skip = rapIds.length - 1;
+  else if (artistId === schlandIds[0]) {
+    rooms.push('schland');
+    skip = schlandIds.length - 1;
   }
+  else if (artistId === ballermanIds[0]) {
+    rooms.push('ballerman');
+    skip = ballermanIds.length - 1;
+  } 
   else {
-    rooms.push('oldies', 'rock');
-    skip = rockIds.length - 1;
+    rooms.push('wtf');
+    //skip = Ids.length - 1;
   }
 };
 
